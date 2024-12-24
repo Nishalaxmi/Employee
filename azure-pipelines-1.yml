@@ -1,0 +1,35 @@
+trigger:
+- main  
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# Step 1: Checkout Code
+- checkout: https://github.com/Nishalaxmi/Employee.git
+  clean: true
+
+# Step 2: Pre-Build Setup
+- script: |
+    echo "Pre-Build: Installing dependencies"
+    npm install
+  displayName: 'Pre-Build: Install Dependencies'
+
+# Step 3: Build
+- script: |
+    echo "Building the application"
+    npm run build
+  displayName: 'Build: Compile Code'
+
+# Step 4: Post-Build Actions
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: 'dist'
+    artifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Post-Build: Publish Artifacts'
+
+# Optional: Send Email Notification
+- script: |
+    echo "Build completed successfully!" | mail -s "Build Notification" nishagold356@gmail.com
+  displayName: 'Post-Build: Send Email Notification'
