@@ -1,19 +1,47 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+  branches:
+    include:
+      - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+# Checkout the code from the specified repository
+- task: Checkout@1
+  displayName: 'Checkout Code'
+  inputs:
+    repository: 'https://github.com/Nishalaxmi/Employee.git'
+
+# Pre-build step: Install dependencies
+- task: UseNode@2
+  displayName: 'Install Node.js'
+  inputs:
+    versionSpec: '16.x'
+    checkLatest: true
+
+- script: npm install
+  displayName: 'Install Dependencies'
+
+# Build step
+- script: npm run build
+  displayName: 'Build Project'
+
+# Post-build step: Archive artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Build Artifacts'
+  inputs:
+    PathtoPublish: 'dist/'
+    ArtifactName: 'drop'
+
+# Post-build step: Send mail notification
+- task: Mail@1
+  displayName: 'Send Email Notification'
+  inputs:
+    To: 'nishagold356@mail.com'
+    Subject: 'Azure DevOps Pipeline Build Notification'
+    Body: |
+      The build pipeline has completed successfully. 
+      Artifact is published and ready for deployment.
+    Attachments: '$(Pipeline.Workspace)/**/*.zip'
